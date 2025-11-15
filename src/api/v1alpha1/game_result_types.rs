@@ -1,9 +1,10 @@
 use kube::CustomResource;
 use serde::{Deserialize, Serialize};
+use schemars::JsonSchema;
 
 /// GameResult is the Schema for the GameResult API.
 /// Each instance records the outcome of a single match.
-#[derive(CustomResource, Deserialize, Serialize, Debug, Clone)]
+#[derive(CustomResource, Deserialize, Serialize, Debug, Clone, JsonSchema)]
 #[kube(
     group = "league.bexxmodd.com",
     version = "v1alpha1",
@@ -19,7 +20,7 @@ pub struct GameResultSpec {
     pub round_number: u32,
 
     /// Teams contains the names of the two teams that played the game.
-    pub teams: [Team; 2],
+    pub teams: [String; 2],
 
     /// Date is the time the game was played, preferably in RFC3339 format.
     pub date: String,
@@ -30,12 +31,16 @@ pub struct GameResultSpec {
 
 /// GameOutcome defines the outcome and point distribution for the match.
 /// (Winner: 3 points, Loser: 0 points, Draw: 1 point each)
-#[derive(Deserialize, Serialize, Debug, Clone)]
+#[derive(Deserialize, Serialize, Debug, Clone, JsonSchema)]
 pub enum GameOutcome {
-    /// WinnerTeam0 indicates the first team in the `teams` array won.
-    WinnerTeam0 { score_t0: u32, score_t1: u32 },
-    /// WinnerTeam1 indicates the second team in the `teams` array won.
-    WinnerTeam1 { score_t0: u32, score_t1: u32 },
+    /// WinnerHomeTeam indicates the team whose name is the FIRST element 
+    /// in the `teams` array won (the 'Home' team).
+    WinnerHomeTeam { score_home: u32, score_away: u32 },
+    
+    /// WinnerAwayTeam indicates the team whose name is the SECOND element 
+    /// in the `teams` array won (the 'Away' team).
+    WinnerAwayTeam { score_home: u32, score_away: u32 },
+    
     /// Draw indicates a tie game.
     Draw { score: u32 },
 }
