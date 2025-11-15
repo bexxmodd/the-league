@@ -1,0 +1,62 @@
+use k8s_openapi::apimachinery::pkg::apis::meta::v1::Condition;
+use kube::CustomResource;
+use serde::{Deserialize, Serialize};
+
+/// TheLeague is the Schema for the TheLeague API.
+/// This defines the configuration and participating teams.
+#[derive(CustomResource, Deserialize, Serialize, Debug, Clone)]
+#[kube(
+    group = "league.bexxmodd.com",
+    version = "v1alpha1",
+    kind = "TheLeague",
+    plural = "theleagues",
+    namespaced
+)]
+#[kube(status = "TheLeagueStatus")] // Status reports overall health, not standings
+pub struct TheLeagueSpec {
+    /// MaxTeams specifies the maximum number of teams allowed in the league (currently 8).
+    pub max_teams: u8,
+
+    /// MatchupsPerPair defines the number of times any two teams must play each other.
+    pub matchups_per_pair: u32,
+
+    /// Teams is the list of teams currently registered in the league.
+    pub teams: Vec<Team>,
+}
+
+/// TheLeagueStatus defines the observed state of TheLeague.
+#[derive(Deserialize, Serialize, Debug, Default, Clone)]
+pub struct TheLeagueStatus {
+    /// Ready indicates if the league is configured and the controller is running.
+    pub ready: bool,
+
+    /// Conditions represent the latest available observations of an object's state.
+    /// +listType=map
+    /// +listMapKey=type
+    pub conditions: Option<Vec<Condition>>,
+}
+
+/// Team represents an individual team participating in the league.
+#[derive(Deserialize, Serialize, Debug, Clone)]
+pub struct Team {
+    /// Name is the unique identifier for the team.
+    pub name: String,
+
+    /// Description provides an optional short description for the team.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
+
+    /// Location is an optional field for the team's location or home field.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub location: Option<String>,
+
+    /// Players is the roster of players on this team.
+    pub players: Vec<Player>,
+}
+
+/// Player represents an individual player on a team's roster.
+#[derive(Deserialize, Serialize, Debug, Clone)]
+pub struct Player {
+    /// Name is the player's name.
+    pub name: String,
+}
