@@ -17,10 +17,7 @@ use schemars::JsonSchema;
 pub struct TheLeagueSpec {
     /// MaxTeams specifies the maximum number of teams allowed in the league (currently 8).
     #[serde(rename = "maxTeams")]
-    #[schemars(
-        validate(minimum=1),
-        validate(maximum=8),
-    )]
+    #[schemars(length(min = 2, max = 8))]
     pub max_teams: u8,
 
     /// Matchups defines the number of times any two teams must play each other.
@@ -44,10 +41,7 @@ pub struct TheLeagueStatus {
 #[derive(Deserialize, Serialize, Debug, Clone, JsonSchema)]
 pub struct Team {
     /// Name is the unique identifier for the team.
-    #[schemars(
-        // Enforce alphanumeric characters and spaces only
-        validate(pattern = "^[a-zA-Z0-9 ]+$") 
-    )]
+    #[schemars(regex(pattern =r"^[a-zA-Z0-9 ]+$"))]
     pub name: String,
 
     /// Description provides an optional short description for the team.
@@ -67,15 +61,11 @@ pub struct Team {
 pub struct Player {
     /// FirstName is the first name of a player.
     #[serde(rename = "firstName")]
-    #[schemars(
-        validate(pattern = "^[a-zA-Z]+$")
-    )]
+    #[schemars(regex(pattern = r"^[a-zA-Z]+$"))]
     pub first_name: String,
 
     /// LastName is the last name of a player.
     #[serde(rename = "lastName")]
-    #[schemars(
-        validate(pattern = "^[a-zA-Z]+$")
-    )]
+    #[schemars(regex(pattern = r"^[a-zA-Z]+$"))]
     pub last_name: String,
 }
