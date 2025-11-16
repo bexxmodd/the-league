@@ -1,0 +1,109 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: gameresults.bexxmodd.com
+spec:
+  group: bexxmodd.com
+  names:
+    categories: []
+    kind: GameResult
+    plural: gameresults
+    shortNames: []
+    singular: gameresult
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns: []
+    name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: Auto-generated derived type for GameResultSpec via `CustomResource`
+        properties:
+          spec:
+            description: |-
+              GameResult is the Schema for the GameResult API.
+              Each instance records the outcome of a single match.
+            properties:
+              leagueName:
+                description: LeagueName references the parent TheLeague resource this game belongs to.
+                type: string
+              result:
+                description: Result specifies the outcome and scores of the game.
+                oneOf:
+                - required:
+                  - WinnerHomeTeam
+                - required:
+                  - WinnerAwayTeam
+                - required:
+                  - Draw
+                properties:
+                  Draw:
+                    description: Draw indicates a tie game.
+                    properties:
+                      score:
+                        format: uint32
+                        minimum: 0.0
+                        type: integer
+                    required:
+                    - score
+                    type: object
+                  WinnerAwayTeam:
+                    description: "WinnerAwayTeam indicates the team whose name is the SECOND element \nin the `teams` array won (the 'Away' team)."
+                    properties:
+                      score_away:
+                        format: uint32
+                        minimum: 0.0
+                        type: integer
+                      score_home:
+                        format: uint32
+                        minimum: 0.0
+                        type: integer
+                    required:
+                    - score_away
+                    - score_home
+                    type: object
+                  WinnerHomeTeam:
+                    description: "WinnerHomeTeam indicates the team whose name is the FIRST element \nin the `teams` array won (the 'Home' team)."
+                    properties:
+                      score_away:
+                        format: uint32
+                        minimum: 0.0
+                        type: integer
+                      score_home:
+                        format: uint32
+                        minimum: 0.0
+                        type: integer
+                    required:
+                    - score_away
+                    - score_home
+                    type: object
+                type: object
+              roundNumber:
+                description: RoundNumber indicates which round of the league schedule this game belongs to.
+                format: uint32
+                minimum: 0.0
+                type: integer
+              teams:
+                description: Teams contains the names of the two teams that played the game.
+                items:
+                  type: string
+                maxItems: 2
+                minItems: 2
+                type: array
+              time:
+                description: Time is the time the game was played, preferably in RFC3339 format.
+                format: date-time
+                type: string
+            required:
+            - leagueName
+            - result
+            - roundNumber
+            - teams
+            - time
+            type: object
+        required:
+        - spec
+        title: GameResult
+        type: object
+    served: true
+    storage: true
+    subresources: {}

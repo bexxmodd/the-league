@@ -1,0 +1,133 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: theleagues.bexxmodd.com
+spec:
+  group: bexxmodd.com
+  names:
+    categories: []
+    kind: TheLeague
+    plural: theleagues
+    shortNames: []
+    singular: theleague
+  scope: Namespaced
+  versions:
+  - additionalPrinterColumns: []
+    name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: Auto-generated derived type for TheLeagueSpec via `CustomResource`
+        properties:
+          spec:
+            description: |-
+              TheLeague is the Schema for the TheLeague API.
+              This defines the configuration and participating teams.
+            properties:
+              matchups:
+                description: Matchups defines the number of times any two teams must play each other.
+                format: uint32
+                minimum: 0.0
+                type: integer
+              maxTeams:
+                description: MaxTeams specifies the maximum number of teams allowed in the league (currently 8).
+                format: uint8
+                maximum: 255.0
+                minimum: 0.0
+                type: integer
+              teams:
+                description: Teams is the list of teams currently registered in the league.
+                items:
+                  description: Team represents an individual team participating in the league.
+                  properties:
+                    description:
+                      description: Description provides an optional short description for the team.
+                      nullable: true
+                      type: string
+                    location:
+                      description: Location is an optional field for the team's location or home field.
+                      nullable: true
+                      type: string
+                    name:
+                      description: Name is the unique identifier for the team.
+                      pattern: ^[a-zA-Z0-9 ]+$
+                      type: string
+                    players:
+                      description: Players is the roster of players on this team.
+                      items:
+                        description: Player represents an individual player on a team's roster.
+                        properties:
+                          firstName:
+                            description: FirstName is the first name of a player.
+                            pattern: ^[a-zA-Z]+$
+                            type: string
+                          lastName:
+                            description: LastName is the last name of a player.
+                            pattern: ^[a-zA-Z]+$
+                            type: string
+                        required:
+                        - firstName
+                        - lastName
+                        type: object
+                      type: array
+                  required:
+                  - name
+                  - players
+                  type: object
+                type: array
+            required:
+            - matchups
+            - maxTeams
+            - teams
+            type: object
+          status:
+            description: TheLeagueStatus defines the observed state of TheLeague.
+            nullable: true
+            properties:
+              conditions:
+                description: Conditions represent the latest available observations of an object's state.
+                items:
+                  description: Condition contains details for one aspect of the current state of this API Resource.
+                  properties:
+                    lastTransitionTime:
+                      description: lastTransitionTime is the last time the condition transitioned from one status to another. This should be when the underlying condition changed.  If that is not known, then using the time when the API field changed is acceptable.
+                      format: date-time
+                      type: string
+                    message:
+                      description: message is a human readable message indicating details about the transition. This may be an empty string.
+                      type: string
+                    observedGeneration:
+                      description: observedGeneration represents the .metadata.generation that the condition was set based upon. For instance, if .metadata.generation is currently 12, but the .status.conditions[x].observedGeneration is 9, the condition is out of date with respect to the current state of the instance.
+                      format: int64
+                      type: integer
+                    reason:
+                      description: reason contains a programmatic identifier indicating the reason for the condition's last transition. Producers of specific condition types may define expected values and meanings for this field, and whether the values are considered a guaranteed API. The value should be a CamelCase string. This field may not be empty.
+                      type: string
+                    status:
+                      description: status of the condition, one of True, False, Unknown.
+                      type: string
+                    type:
+                      description: type of condition in CamelCase or in foo.example.com/CamelCase.
+                      type: string
+                  required:
+                  - lastTransitionTime
+                  - message
+                  - reason
+                  - status
+                  - type
+                  type: object
+                nullable: true
+                type: array
+              live:
+                description: Live indicates if the league is configured and the controller is running.
+                type: boolean
+            required:
+            - live
+            type: object
+        required:
+        - spec
+        title: TheLeague
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

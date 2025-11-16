@@ -7,7 +7,7 @@ use schemars::JsonSchema;
 /// This resource tracks the calculated performance for a single Team.
 #[derive(CustomResource, Deserialize, Serialize, Debug, Clone, JsonSchema)]
 #[kube(
-    group = "league.bexxmodd.com",
+    group = "bexxmodd.com",
     version = "v1alpha1",
     kind = "Standing",
     plural = "standings",
@@ -22,6 +22,9 @@ pub struct StandingSpec {
     /// TeamName is the name of the team this standing corresponds to.
     #[serde(rename = "teamName")]
     pub team_name: String,
+
+    /// Resolution defines the tie-breaking method used for calculating the standing.
+    pub resolution: StandingResolution
 }
 
 /// StandingStatus defines the observed and computed state of the Standing.
@@ -39,4 +42,14 @@ pub struct StandingStatus {
 
     /// Conditions represent the latest available observations of the Standing's state.
     pub conditions: Option<Vec<Condition>>,
+}
+
+/// StandingResolution defines the tie-breaking method used for the standings.
+#[derive(Deserialize, Serialize, Debug, Clone, JsonSchema)]
+pub enum StandingResolution {
+    /// Head2Head resolution prioritizes the outcome of direct matches between tied teams.
+    Head2Head,
+    
+    /// GoalDifference resolution prioritizes the overall goal difference across all matches.
+    GoalDifference,
 }

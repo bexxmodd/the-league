@@ -7,7 +7,7 @@ use schemars::JsonSchema;
 /// This defines the configuration and participating teams.
 #[derive(CustomResource, Deserialize, Serialize, Debug, Clone, JsonSchema)]
 #[kube(
-    group = "league.bexxmodd.com",
+    group = "bexxmodd.com",
     version = "v1alpha1",
     kind = "TheLeague",
     plural = "theleagues",

@@ -2,6 +2,7 @@
 name = "the-league"
 version = "0.1.0"
 edition = "2024"
+default-run = "the-league"
 
 [dependencies]
 kube = { version = "2.0.1", features = ["runtime", "derive"] }
@@ -12,3 +13,8 @@ futures = "0.3"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+anyhow = "1.0"
+axum = "0.8.7"
+hyper = { version = "1", features = ["server"] }
+serde_yaml = "0.9"

@@ -1,12 +1,13 @@
 use kube::CustomResource;
 use serde::{Deserialize, Serialize};
 use schemars::JsonSchema;
+use k8s_openapi::apimachinery::pkg::apis::meta::v1::Time;
 
 /// GameResult is the Schema for the GameResult API.
 /// Each instance records the outcome of a single match.
 #[derive(CustomResource, Deserialize, Serialize, Debug, Clone, JsonSchema)]
 #[kube(
-    group = "league.bexxmodd.com",
+    group = "bexxmodd.com",
     version = "v1alpha1",
     kind = "GameResult",
     plural = "gameresults",
@@ -14,16 +15,18 @@ use schemars::JsonSchema;
 )]
 pub struct GameResultSpec {
     /// LeagueName references the parent TheLeague resource this game belongs to.
+    #[serde(rename = "leagueName")]
     pub league_name: String,
 
     /// RoundNumber indicates which round of the league schedule this game belongs to.
+    #[serde(rename = "roundNumber")]
     pub round_number: u32,
 
     /// Teams contains the names of the two teams that played the game.
     pub teams: [String; 2],
 
-    /// Date is the time the game was played, preferably in RFC3339 format.
-    pub date: String,
+    /// Time is the time the game was played, preferably in RFC3339 format.
+    pub time: Time,
 
     /// Result specifies the outcome and scores of the game.
     pub result: GameOutcome,
