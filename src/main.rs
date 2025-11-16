@@ -1,49 +1,14 @@
 mod api;
+mod controller;
 
 use anyhow::Context as AnyhowContext;
-use api::v1alpha1::the_league_types::TheLeague;
 use axum::{Router, http::StatusCode, routing::get};
+use controller::{Context, TheLeagueController};
 use futures::StreamExt;
-use kube::{
-    Api, Client, ResourceExt,
-    runtime::{
-        controller::{Action, Controller},
-        watcher,
-    },
-};
+use kube::{Api, Client};
 use std::{net::SocketAddr, sync::Arc};
-use tokio::{net::TcpListener, time::Duration};
+use tokio::net::TcpListener;
 use tracing::{error, info};
-
-pub type Result<T, E = kube::Error> = std::result::Result<T, E>;
-
-// --- Context and Reconciler Definition ---
-
-/// Context shared between the controller and the worker threads
-#[derive(Clone)]
-struct Context {
-    /// Kubernetes client
-    _client: Client,
-}
-
-async fn reconcile(league: Arc<TheLeague>, _ctx: Arc<Context>) -> Result<Action, kube::Error> {
-    info!("reconcile request: {}", league.name_any());
-    Ok(Action::requeue(Duration::from_secs(3600)))
-}
-
-fn error_policy(_object: Arc<TheLeague>, _err: &kube::Error, _ctx: Arc<Context>) -> Action {
-    info!("error policy: {}", _err);
-    Action::requeue(Duration::from_secs(5))
-}
-
-// Health check endpoints (equivalent to healthz.Ping in Go)
-async fn healthz() -> (StatusCode, &'static str) {
-    (StatusCode::OK, "ok")
-}
-
-async fn readyz() -> (StatusCode, &'static str) {
-    (StatusCode::OK, "ok")
-}
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -54,10 +19,8 @@ async fn main() -> anyhow::Result<()> {
 
     let client = Client::try_default().await?;
     let context = Arc::new(Context {
-        _client: client.clone(),
+        client: client.clone(),
     });
-
-    let league_api: Api<TheLeague> = Api::all(client.clone());
 
     // Equivalent to mgr.AddHealthzCheck("healthz", healthz.Ping) and mgr.AddReadyzCheck("readyz", healthz.Ping)
     let app = Router::new()
@@ -78,9 +41,17 @@ async fn main() -> anyhow::Result<()> {
     let server = axum::serve(listener, app);
 
     info!("Starting reconciliation loop for TheLeague...");
-    let controller = Controller::new(league_api, watcher::Config::default())
+
+    let league_controller = TheLeagueController::new(context.clone());
+    let context_for_run = league_controller.get_context();
+    let stream = league_controller
+        .get_controller()
         .shutdown_on_signal()
-        .run(reconcile, error_policy, context)
+        .run(
+            TheLeagueController::reconcile,
+            TheLeagueController::error_policy,
+            context_for_run,
+        )
         .for_each(|_| futures::future::ready(()));
 
     info!("Starting manager");
@@ -93,10 +64,19 @@ async fn main() -> anyhow::Result<()> {
                 info!("Result: {:?}", result)
             }
         }
-        _ = controller => {
+        _ = stream => {
             info!("Controller stream ended");
         }
     }
     info!("Done!");
     Ok(())
+}
+
+// Health check endpoints (equivalent to healthz.Ping in Go)
+async fn healthz() -> (StatusCode, &'static str) {
+    (StatusCode::OK, "ok")
+}
+
+async fn readyz() -> (StatusCode, &'static str) {
+    (StatusCode::OK, "ok")
 }
