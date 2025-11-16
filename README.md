@@ -1,2 +1,5 @@
-# the-league
-CRD for starting a sports league
+# The League
+
+CRD for running a sports league on your Kubernetes cluster.
+
+More coming...
