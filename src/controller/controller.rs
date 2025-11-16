@@ -1,4 +1,6 @@
 use crate::api::v1alpha1::the_league_types::TheLeague;
+
+use futures::StreamExt;
 use kube::runtime::{controller::Controller as KubeController, watcher};
 use kube::{Api, Client, ResourceExt, runtime::controller::Action};
 use std::sync::Arc;
@@ -52,14 +54,6 @@ impl TheLeagueController {
         }
     }
 
-    pub fn get_controller(self) -> KubeController<TheLeague> {
-        self.controller
-    }
-
-    pub fn get_context(&self) -> Arc<Context> {
-        self.context.clone()
-    }
-
     /// Reconcile a TheLeague resource (static method)
     pub async fn reconcile(
         league: Arc<TheLeague>,
@@ -73,5 +67,17 @@ impl TheLeagueController {
     pub fn error_policy(_object: Arc<TheLeague>, err: &kube::Error, _ctx: Arc<Context>) -> Action {
         info!("error policy: {}", err);
         Action::requeue(Duration::from_secs(5))
+    }
+
+    pub fn stream(self) -> impl futures::Future<Output = ()> {
+        let context = self.context.clone();
+        self.controller
+            .shutdown_on_signal()
+            .run(
+                TheLeagueController::reconcile,
+                TheLeagueController::error_policy,
+                context,
+            )
+            .for_each(|_| futures::future::ready(()))
     }
 }

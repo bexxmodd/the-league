@@ -4,8 +4,7 @@ mod controller;
 use anyhow::Context as AnyhowContext;
 use axum::{Router, http::StatusCode, routing::get};
 use controller::{Context, TheLeagueController};
-use futures::StreamExt;
-use kube::{Api, Client};
+use kube::Client;
 use std::{net::SocketAddr, sync::Arc};
 use tokio::net::TcpListener;
 use tracing::{error, info};
@@ -43,16 +42,7 @@ async fn main() -> anyhow::Result<()> {
     info!("Starting reconciliation loop for TheLeague...");
 
     let league_controller = TheLeagueController::new(context.clone());
-    let context_for_run = league_controller.get_context();
-    let stream = league_controller
-        .get_controller()
-        .shutdown_on_signal()
-        .run(
-            TheLeagueController::reconcile,
-            TheLeagueController::error_policy,
-            context_for_run,
-        )
-        .for_each(|_| futures::future::ready(()));
+    let controller_stream = league_controller.stream();
 
     info!("Starting manager");
     tokio::select! {
@@ -64,7 +54,7 @@ async fn main() -> anyhow::Result<()> {
                 info!("Result: {:?}", result)
             }
         }
-        _ = stream => {
+        _ = controller_stream => {
             info!("Controller stream ended");
         }
     }
