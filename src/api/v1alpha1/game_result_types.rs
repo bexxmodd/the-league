@@ -1,7 +1,7 @@
-use kube::CustomResource;
-use serde::{Deserialize, Serialize};
-use schemars::JsonSchema;
 use k8s_openapi::apimachinery::pkg::apis::meta::v1::Time;
+use kube::CustomResource;
+use schemars::JsonSchema;
+use serde::{Deserialize, Serialize};
 
 /// GameResult is the Schema for the GameResult API.
 /// Each instance records the outcome of a single match.
@@ -11,7 +11,7 @@ use k8s_openapi::apimachinery::pkg::apis::meta::v1::Time;
     version = "v1alpha1",
     kind = "GameResult",
     plural = "gameresults",
-    namespaced
+    namespaced,
 )]
 pub struct GameResultSpec {
     /// LeagueName references the parent TheLeague resource this game belongs to.
@@ -36,14 +36,14 @@ pub struct GameResultSpec {
 /// (Winner: 3 points, Loser: 0 points, Draw: 1 point each)
 #[derive(Deserialize, Serialize, Debug, Clone, JsonSchema)]
 pub enum GameOutcome {
-    /// WinnerHomeTeam indicates the team whose name is the FIRST element 
+    /// WinnerHomeTeam indicates the team whose name is the FIRST element
     /// in the `teams` array won (the 'Home' team).
     WinnerHomeTeam { score_home: u32, score_away: u32 },
-    
-    /// WinnerAwayTeam indicates the team whose name is the SECOND element 
+
+    /// WinnerAwayTeam indicates the team whose name is the SECOND element
     /// in the `teams` array won (the 'Away' team).
     WinnerAwayTeam { score_home: u32, score_away: u32 },
-    
+
     /// Draw indicates a tie game.
     Draw { score: u32 },
 }

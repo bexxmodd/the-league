@@ -1,3 +1,3 @@
-pub mod controller;
+pub mod theleague_controller;
 
-pub use controller::{Context, TheLeagueController};
+pub use theleague_controller::{Context, Reconciler};

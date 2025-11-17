@@ -11,9 +11,9 @@ use schemars::JsonSchema;
     version = "v1alpha1",
     kind = "TheLeague",
     plural = "theleagues",
-    namespaced
+    status = "TheLeagueStatus",
+    namespaced,
 )]
-#[kube(status = "TheLeagueStatus")] // Status reports overall health, not standings
 pub struct TheLeagueSpec {
     /// MaxTeams specifies the maximum number of teams allowed in the league (currently 8).
     #[serde(rename = "maxTeams")]
@@ -33,8 +33,10 @@ pub struct TheLeagueStatus {
     /// Live indicates if the league is configured and the controller is running.
     pub live: bool,
 
-    /// Conditions represent the latest available observations of an object's state.
-    pub conditions: Option<Vec<Condition>>,
+    /// Conditions represent the latest available observations of the resource's state.
+    /// This is the standard field for status reporting.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub conditions: Vec<Condition>,
 }
 
 /// Team represents an individual team participating in the league.

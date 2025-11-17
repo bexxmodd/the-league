@@ -11,9 +11,9 @@ use schemars::JsonSchema;
     version = "v1alpha1",
     kind = "Standing",
     plural = "standings",
-    namespaced
+    status = "StandingStatus",
+    namespaced,
 )]
-#[kube(status = "StandingStatus")]
 pub struct StandingSpec {
     /// LeagueName references the parent TheLeague resource this standing belongs to.
     #[serde(rename = "leagueName")]
@@ -33,15 +33,19 @@ pub struct StandingSpec {
 pub struct StandingStatus {
     /// Points is the total accumulated points for the team.
     pub points: u32,
+
     /// Wins is the total number of wins.
     pub wins: u32,
+
     /// Losses is the total number of losses.
     pub losses: u32,
+
     /// Draws is the total number of draws.
     pub draws: u32,
 
     /// Conditions represent the latest available observations of the Standing's state.
-    pub conditions: Option<Vec<Condition>>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub conditions: Vec<Condition>,
 }
 
 /// StandingResolution defines the tie-breaking method used for the standings.

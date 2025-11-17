@@ -15,12 +15,12 @@ pub struct Context {
 }
 
 /// Controller for managing TheLeague resources
-pub struct TheLeagueController {
+pub struct Reconciler {
     context: Arc<Context>,
     controller: KubeController<TheLeague>,
 }
 
-impl TheLeagueController {
+impl Reconciler {
     /// Create a new TheLeagueController
     pub fn new(context: Arc<Context>) -> Self {
         // Configure default namespace(s) - equivalent to cache.Options.DefaultNamespaces in Go
@@ -73,11 +73,7 @@ impl TheLeagueController {
         let context = self.context.clone();
         self.controller
             .shutdown_on_signal()
-            .run(
-                TheLeagueController::reconcile,
-                TheLeagueController::error_policy,
-                context,
-            )
+            .run(Reconciler::reconcile, Reconciler::error_policy, context)
             .for_each(|_| futures::future::ready(()))
     }
 }

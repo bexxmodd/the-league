@@ -3,7 +3,7 @@ mod controller;
 
 use anyhow::Context as AnyhowContext;
 use axum::{Router, http::StatusCode, routing::get};
-use controller::{Context, TheLeagueController};
+use controller::theleague_controller;
 use kube::Client;
 use std::{net::SocketAddr, sync::Arc};
 use tokio::net::TcpListener;
@@ -17,7 +17,7 @@ async fn main() -> anyhow::Result<()> {
     info!("Starting TheLeague Controller (Idiomatic kube-rs).");
 
     let client = Client::try_default().await?;
-    let context = Arc::new(Context {
+    let context = Arc::new(theleague_controller::Context {
         client: client.clone(),
     });
 
@@ -41,7 +41,7 @@ async fn main() -> anyhow::Result<()> {
 
     info!("Starting reconciliation loop for TheLeague...");
 
-    let league_controller = TheLeagueController::new(context.clone());
+    let league_controller = theleague_controller::Reconciler::new(context.clone());
     let controller_stream = league_controller.stream();
 
     info!("Starting manager");
