@@ -1,11 +1,14 @@
-use crate::api::v1alpha1::the_league_types::TheLeague;
+use crate::api::v1alpha1::the_league_types::{TheLeague, TheLeagueStatus};
 
 use futures::StreamExt;
+use k8s_openapi::apimachinery::pkg::apis::meta::v1;
+use k8s_openapi::chrono;
 use kube::runtime::{controller::Controller as KubeController, watcher};
 use kube::{Api, Client, ResourceExt, runtime::controller::Action};
+use kube::api;
 use std::sync::Arc;
 use tokio::time::Duration;
-use tracing::info;
+use tracing::{info, error};
 
 /// Context shared between the controller and the worker threads
 #[derive(Clone)]
@@ -57,9 +60,56 @@ impl Reconciler {
     /// Reconcile a TheLeague resource (static method)
     pub async fn reconcile(
         league: Arc<TheLeague>,
-        _ctx: Arc<Context>,
+        ctx: Arc<Context>,
     ) -> Result<Action, kube::Error> {
         info!("reconcile request: {}", league.name_any());
+        let name = league.name_any();
+        let namespace = league.namespace().unwrap_or_default();
+        let client = ctx.client.clone();
+        let league_api: Api<TheLeague> = Api::namespaced(client, &namespace);
+
+        let league = match league_api.get(&name).await {
+            Ok(resource) => {
+                info!("TheLeague '{}' found. Proceeding with reconciliation.", name);
+                resource
+            }
+            Err(kube::Error::Api(e)) if e.code == 404 => {
+                info!("TheLeague resource not found (404). Ignoring since object must be deleted.");
+                return Ok(Action::await_change()); 
+            }
+            Err(e) => {
+                // Error reading the object - requeue the request.
+                error!("Failed to get TheLeague: {:?}", e);
+                return Err(e)
+            }
+        };
+        let current_conditions = league.status.as_ref().map(|s| &s.conditions).unwrap_or(&vec![]);
+        if !current_conditions.is_empty() {
+            // 1. Define initial status condition
+            let initial_condition = v1::Condition {
+                type_: String::from("Processing"),
+                status: "Unknown".to_string(), // Equivalent to metav1.ConditionUnknown
+                reason: String::from("Reconciling"),
+                message: "Starting reconciliation".to_string(),
+                // Required timestamp and generation fields
+                last_transition_time:v1::Time(chrono::Utc::now()),
+                observed_generation: league.metadata.generation, 
+            };
+
+            // 2. Create the initial status object for patching
+            let initial_status = TheLeagueStatus {
+                live: false, 
+                conditions: vec![initial_condition],
+            };
+
+            //     // 3. Patch Status: Equivalent to Go's `r.Status().Update()`
+            // let status_patch = api::Patch::Merge(TheLeague {
+            //     status: Some(initial_status),
+            //     // Ensure other fields are defaulted/ignored during the status patch
+            //     ..TheLeague::new(&name, )
+            // });
+        }
+
         Ok(Action::requeue(Duration::from_secs(3600)))
     }
 

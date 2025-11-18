@@ -1,0 +1,38 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/name: theleague
+  name: theleague-admin-role
+rules:
+- apiGroups:
+  - bexxmodd.com
+  resources:
+  - theleagues
+  verbs:
+  - '*'
+- apiGroups:
+  - bexxmodd.com
+  resources:
+  - theleagues/status
+  verbs:
+  - get
+- apiGroups:
+  - bexxmodd.com
+  resources:
+  - standings
+  verbs:
+  - '*'
+- apiGroups:
+  - bexxmodd.com
+  resources:
+  - standings/status
+  verbs:
+  - get
+- apiGroups:
+  - bexxmodd.com
+  resources:
+  - gameresults
+  verbs:
+  - '*'

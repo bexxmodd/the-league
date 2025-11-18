@@ -1,0 +1,64 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: manager-role
+rules:
+- apiGroups:
+  - bexxmodd.com
+  resources:
+  - theleagues
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
+- apiGroups:
+  - bexxmodd.com
+  resources:
+  - theleagues/status
+  verbs:
+  - get
+  - update
+  - patch
+- apiGroups:
+  - bexxmodd.com
+  resources:
+  - standings
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
+- apiGroups:
+  - bexxmodd.com
+  resources:
+  - standings/status
+  verbs:
+  - get
+  - update
+  - patch
+- apiGroups:
+  - bexxmodd.com
+  resources:
+  - gameresults
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
+- apiGroups:
+  - ''
+  resources:
+  - events
+  verbs:
+  - create
+  - patch

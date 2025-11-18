@@ -47,7 +47,9 @@ spec:
                     - score
                     type: object
                   WinnerAwayTeam:
-                    description: "WinnerAwayTeam indicates the team whose name is the SECOND element \nin the `teams` array won (the 'Away' team)."
+                    description: |-
+                      WinnerAwayTeam indicates the team whose name is the SECOND element
+                      in the `teams` array won (the 'Away' team).
                     properties:
                       score_away:
                         format: uint32
@@ -62,7 +64,9 @@ spec:
                     - score_home
                     type: object
                   WinnerHomeTeam:
-                    description: "WinnerHomeTeam indicates the team whose name is the FIRST element \nin the `teams` array won (the 'Home' team)."
+                    description: |-
+                      WinnerHomeTeam indicates the team whose name is the FIRST element
+                      in the `teams` array won (the 'Home' team).
                     properties:
                       score_away:
                         format: uint32

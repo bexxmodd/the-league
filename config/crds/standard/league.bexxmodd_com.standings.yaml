@@ -78,7 +78,6 @@ spec:
                   - status
                   - type
                   type: object
-                nullable: true
                 type: array
               draws:
                 description: Draws is the total number of draws.

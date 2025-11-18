@@ -1,0 +1,9 @@
+resources:
+  - role.yaml
+  - role_binding.yaml
+  - leader_election_role.yaml
+  - leader_election_role_binding.yaml
+  - service_account.yaml
+  - theleague_admin_role.yaml
+  - theleague_editor_role.yaml
+  - theleague_viewer_role.yaml

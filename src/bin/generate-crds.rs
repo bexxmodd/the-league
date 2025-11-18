@@ -62,7 +62,7 @@ fn generate_all_crds(output_dir: &Path) -> anyhow::Result<Vec<String>> {
 
 fn main() -> anyhow::Result<()> {
     // Ensure standard directory exists (GatewayAPI-style structure)
-    let standard_dir = Path::new("Config/crds/standard");
+    let standard_dir = Path::new("config/crds/standard");
     if !standard_dir.exists() {
         fs::create_dir_all(standard_dir)?;
     }
@@ -70,8 +70,8 @@ fn main() -> anyhow::Result<()> {
     generate_all_crds(standard_dir)?;
 
     println!("\nAll CRDs generated successfully!");
-    println!("Apply them with: kubectl apply -k Config/crds/");
-    println!("Or directly: kubectl apply -f Config/crds/standard/");
+    println!("Apply them with: kubectl apply -k config/crds/");
+    println!("Or directly: kubectl apply -f config/crds/standard/");
 
     Ok(())
 }

@@ -84,7 +84,9 @@ spec:
             nullable: true
             properties:
               conditions:
-                description: Conditions represent the latest available observations of an object's state.
+                description: |-
+                  Conditions represent the latest available observations of the resource's state.
+                  This is the standard field for status reporting.
                 items:
                   description: Condition contains details for one aspect of the current state of this API Resource.
                   properties:
@@ -115,7 +117,6 @@ spec:
                   - status
                   - type
                   type: object
-                nullable: true
                 type: array
               live:
                 description: Live indicates if the league is configured and the controller is running.
